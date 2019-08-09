@@ -8,10 +8,9 @@ const {
   Application,
   Loader,
   Sprite,
-  resources,
 } = PIXI;
 
-const app = new PIXI.Application({
+const app = new Application({
   antialias: true,
 });
 
@@ -30,9 +29,13 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 const setup = (): void => {
   console.log('setup');
 
-  const sprite = PIXI.Sprite.from(catImg);
+  const cat = Sprite.from(catImg);
 
-  app.stage.addChild(sprite);
+  cat.position.set(96, 155);
+  cat.width = 150;
+  cat.height = 150;
+
+  app.stage.addChild(cat);
 };
 
 const loadProgressHandler = (loader, resource): void => {
