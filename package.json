@@ -30,6 +30,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
+    "file-loader": "^4.2.0",
     "normalize.css": "^8.0.1",
     "pixi.js": "^5.1.1"
   }
