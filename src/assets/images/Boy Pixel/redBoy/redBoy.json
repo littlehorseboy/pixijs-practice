@@ -1,0 +1,42 @@
+{"frames": {
+
+"redright.png":
+{
+	"frame": {"x":0,"y":0,"w":19,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
+	"sourceSize": {"w":19,"h":32},
+	"anchor": {"x":0.5,"y":0.5}
+},
+"redrightwalk1.png":
+{
+	"frame": {"x":19,"y":0,"w":19,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
+	"sourceSize": {"w":19,"h":32},
+	"anchor": {"x":0.5,"y":0.5}
+},
+"redrightwalk2.png":
+{
+	"frame": {"x":38,"y":0,"w":19,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
+	"sourceSize": {"w":19,"h":32},
+	"anchor": {"x":0.5,"y":0.5}
+}},
+"animations": {
+	"redrightwalk": ["redrightwalk1.png","redrightwalk2.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "redBoy.png",
+	"format": "RGBA8888",
+	"size": {"w":57,"h":32},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:049947c558c4b2ee46388e6965a0b2f2:7608b98bb4ddd14c86f3383b8d87d93b:07f6a17b4c4194814fd21b18159b620b$"
+}
+}
