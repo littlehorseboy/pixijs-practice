@@ -7,7 +7,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
 	"sourceSize": {"w":19,"h":32},
-	"anchor": {"x":0.5,"y":0.5}
+	"anchor": {"x":0,"y":0}
 },
 "redrightwalk1.png":
 {
@@ -16,7 +16,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
 	"sourceSize": {"w":19,"h":32},
-	"anchor": {"x":0.5,"y":0.5}
+	"anchor": {"x":0,"y":0}
 },
 "redrightwalk2.png":
 {
@@ -25,7 +25,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
 	"sourceSize": {"w":19,"h":32},
-	"anchor": {"x":0.5,"y":0.5}
+	"anchor": {"x":0,"y":0}
 }},
 "animations": {
 	"redrightwalk": ["redrightwalk1.png","redrightwalk2.png"]

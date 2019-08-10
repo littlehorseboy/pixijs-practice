@@ -34,11 +34,7 @@ let redBoyRight;
 
 const gameLoop = (delta) => {
   if (redBoyRight) {
-    redBoyRight.vx = 1;
-    redBoyRight.vy = 1;
-
-    redBoyRight.x += redBoyRight.vx;
-    redBoyRight.y += redBoyRight.vy;
+    redBoyRight.x += 1 + delta;
   }
 };
 
@@ -51,8 +47,6 @@ const setup = (loader, resource): void => {
     redBoyRight = new Sprite(something['redright.png']);
     redBoyRight.x = 50;
     redBoyRight.y = 50;
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 0;
     app.stage.addChild(redBoyRight);
   });
 

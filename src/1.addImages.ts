@@ -2,6 +2,8 @@ import 'normalize.css';
 import * as PIXI from 'pixi.js';
 import scaleToWindow from './assets/js/scaleToWindow';
 
+const catImg = require('./assets/images/cat.png'); // eslint-disable-line @typescript-eslint/no-var-requires
+const tilesetImg = require('./assets/images/tileset.png'); // eslint-disable-line @typescript-eslint/no-var-requires
 const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
 const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -9,8 +11,11 @@ const {
   Application,
   Loader,
   Sprite,
+  Rectangle,
   Spritesheet,
 } = PIXI;
+
+const { TextureCache } = PIXI.utils;
 
 const loader = new Loader();
 
@@ -30,33 +35,44 @@ app.renderer.view.style.display = 'block';
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
-let redBoyRight;
-
-const gameLoop = (delta) => {
-  if (redBoyRight) {
-    redBoyRight.vx = 1;
-    redBoyRight.vy = 1;
-
-    redBoyRight.x += redBoyRight.vx;
-    redBoyRight.y += redBoyRight.vy;
-  }
-};
-
 const setup = (loader, resource): void => {
   console.log('setup');
+
+  // cat.png
+  const cat = Sprite.from(catImg);
+
+  cat.position.set(96, 155);
+  cat.width = 150;
+  cat.height = 150;
+
+  cat.scale.set(0.5, 0.5);
+
+  cat.rotation = Math.PI; // https://www.mathsisfun.com/geometry/radians.html
+  cat.anchor.x = 0.5;
+  cat.anchor.y = 0.5;
+
+  app.stage.addChild(cat);
+
+  // tileset.png
+  const texture = TextureCache[tilesetImg];
+  const rectangle = new Rectangle(32 * 3, 32 * 2, 32, 32);
+
+  texture.frame = rectangle;
+
+  const rocket = new Sprite(texture);
+  rocket.x = 32;
+  rocket.y = 32;
+
+  app.stage.addChild(rocket);
 
   // redBoy
   const sheet = new Spritesheet(resource['images/redBoy.png'].texture, redBoyJson);
   sheet.parse((something): void => {
-    redBoyRight = new Sprite(something['redright.png']);
-    redBoyRight.x = 50;
-    redBoyRight.y = 50;
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 0;
+    const redBoyRight = new Sprite(something['redright.png']);
+    redBoyRight.x = 0;
+    redBoyRight.y = 0;
     app.stage.addChild(redBoyRight);
   });
-
-  app.ticker.add((delta) => gameLoop(delta));
 };
 
 const loadProgressHandler = (loader, resource): void => {
@@ -65,6 +81,8 @@ const loadProgressHandler = (loader, resource): void => {
 };
 
 loader
+  .add(catImg)
+  .add(tilesetImg)
   .add(redBoyImg)
   .on('progress', loadProgressHandler)
   .load(setup);

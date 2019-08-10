@@ -1,5 +1,6 @@
 import 'normalize.css';
 import * as PIXI from 'pixi.js';
+import { random } from 'lodash';
 import scaleToWindow from './assets/js/scaleToWindow';
 
 const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -30,33 +31,25 @@ app.renderer.view.style.display = 'block';
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
-let redBoyRight;
-
-const gameLoop = (delta) => {
-  if (redBoyRight) {
-    redBoyRight.vx = 1;
-    redBoyRight.vy = 1;
-
-    redBoyRight.x += redBoyRight.vx;
-    redBoyRight.y += redBoyRight.vy;
-  }
-};
-
 const setup = (loader, resource): void => {
   console.log('setup');
 
   // redBoy
+  const numberOfBlobs = 6;
+  const spacing = 160;
+  const xOffset = 150;
+
   const sheet = new Spritesheet(resource['images/redBoy.png'].texture, redBoyJson);
   sheet.parse((something): void => {
-    redBoyRight = new Sprite(something['redright.png']);
-    redBoyRight.x = 50;
-    redBoyRight.y = 50;
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 0;
-    app.stage.addChild(redBoyRight);
+    Array(numberOfBlobs).fill(null).forEach((item, index) => {
+      const redBoyRight = new Sprite(something['redright.png']);
+      const x = spacing * index + xOffset;
+      const y = random(0, app.renderer.height - redBoyRight.height);
+      redBoyRight.x = x;
+      redBoyRight.y = y;
+      app.stage.addChild(redBoyRight);
+    });
   });
-
-  app.ticker.add((delta) => gameLoop(delta));
 };
 
 const loadProgressHandler = (loader, resource): void => {
