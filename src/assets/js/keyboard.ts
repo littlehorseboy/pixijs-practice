@@ -1,5 +1,5 @@
 interface KeyI {
-  code: any;
+  code: number;
   isDown: boolean;
   isUp: boolean;
   press: any;
@@ -8,7 +8,7 @@ interface KeyI {
   upHandler(event: any): void;
 }
 
-export default function keyboard(keyCode): KeyI {
+export default function keyboard(keyCode: number): KeyI {
   const key = {
     code: keyCode,
     isDown: false,

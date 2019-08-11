@@ -1,9 +1,11 @@
 import 'normalize.css';
 import * as PIXI from 'pixi.js';
 import scaleToWindow from './assets/js/scaleToWindow';
+import keyboard from './assets/js/keyboard';
 
 const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
-const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`); // eslint-disable-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
+const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`);
 
 const {
   Application,
@@ -11,8 +13,6 @@ const {
   Sprite,
   Spritesheet,
 } = PIXI;
-
-const loader = new Loader();
 
 const app = new Application({
   antialias: true,
@@ -32,17 +32,14 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 
 let redBoyRight;
 
-const gameLoop = (delta) => {
+const gameLoop = (delta: number): void => {
   if (redBoyRight) {
-    redBoyRight.vx = 1;
-    redBoyRight.vy = 1;
-
     redBoyRight.x += redBoyRight.vx;
     redBoyRight.y += redBoyRight.vy;
   }
 };
 
-const setup = (loader, resource): void => {
+const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
   console.log('setup');
 
   // redBoy
@@ -56,15 +53,64 @@ const setup = (loader, resource): void => {
     app.stage.addChild(redBoyRight);
   });
 
-  app.ticker.add((delta) => gameLoop(delta));
+  const left = keyboard(37);
+  const up = keyboard(38);
+  const right = keyboard(39);
+  const down = keyboard(40);
+
+  left.press = (): void => {
+    redBoyRight.vx = -5;
+    redBoyRight.vy = 0;
+  };
+
+  left.release = (): void => {
+    if (!right.isDown && redBoyRight.vy === 0) {
+      redBoyRight.vx = 0;
+    }
+  };
+
+  up.press = (): void => {
+    redBoyRight.vx = 0;
+    redBoyRight.vy = -5;
+  };
+
+  up.release = (): void => {
+    if (!down.isDown && redBoyRight.vx === 0) {
+      redBoyRight.vy = 0;
+    }
+  };
+
+  right.press = (): void => {
+    redBoyRight.vx = 5;
+    redBoyRight.vy = 0;
+  };
+
+  right.release = (): void => {
+    if (!left.isDown && redBoyRight.vy === 0) {
+      redBoyRight.vx = 0;
+    }
+  };
+
+  down.press = (): void => {
+    redBoyRight.vx = 0;
+    redBoyRight.vy = 5;
+  };
+
+  down.release = (): void => {
+    if (!up.isDown && redBoyRight.vx === 0) {
+      redBoyRight.vy = 0;
+    }
+  };
+
+  app.ticker.add((delta: number): void => gameLoop(delta));
 };
 
-const loadProgressHandler = (loader, resource): void => {
+const loadProgressHandler = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
   console.log(`loading ${resource.url}`);
-  console.log(`progress ${loader.progress} %`);
+  console.log(`progress ${pixiLoader.progress} %`);
 };
 
-loader
+new Loader()
   .add(redBoyImg)
   .on('progress', loadProgressHandler)
   .load(setup);
