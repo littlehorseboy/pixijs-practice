@@ -1,7 +1,6 @@
 import 'normalize.css';
 import * as PIXI from 'pixi.js';
 import scaleToWindow from './assets/js/scaleToWindow';
-import keyboard from './assets/js/keyboard';
 
 const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
 // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
@@ -12,6 +11,7 @@ const {
   Loader,
   Sprite,
   Spritesheet,
+  ParticleContainer,
 } = PIXI;
 
 const app = new Application({
@@ -30,77 +30,68 @@ app.renderer.view.style.display = 'block';
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
-let redBoyRight;
+const redBoyContainer = new ParticleContainer();
+
+let redBoyRight: PIXI.Sprite;
+let redBoyRightWalk1: PIXI.Sprite;
+let redBoyRightWalk2: PIXI.Sprite;
 
 const gameLoop = (delta: number): void => {
-  if (redBoyRight) {
-    redBoyRight.x += redBoyRight.vx;
-    redBoyRight.y += redBoyRight.vy;
-  }
+
 };
 
 const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
   console.log('setup');
 
   // redBoy
-  const sheet = new Spritesheet(resource['images/redBoy.png'].texture, redBoyJson);
-  sheet.parse((something): void => {
-    redBoyRight = new Sprite(something['redright.png']);
-    redBoyRight.x = 50;
-    redBoyRight.y = 50;
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 0;
-    app.stage.addChild(redBoyRight);
+  const sheet = new Spritesheet(resource[redBoyImg].texture, redBoyJson);
+  sheet.parse((spritesheet): void => {
+    redBoyRight = new Sprite(spritesheet['redright.png']);
+    redBoyRight.position.set(50, 50);
+
+    redBoyRightWalk1 = new Sprite(spritesheet['redrightwalk1.png']);
+    redBoyRightWalk1.position.set(70, 50);
+
+    redBoyRightWalk2 = new Sprite(spritesheet['redrightwalk2.png']);
+    redBoyRightWalk2.position.set(90, 50);
+
+    redBoyContainer.addChild(redBoyRight);
+    redBoyContainer.addChild(redBoyRightWalk1);
+    redBoyContainer.addChild(redBoyRightWalk2);
+
+    redBoyContainer.position.set(64, 64);
+
+    app.stage.addChild(redBoyContainer);
+
+    console.log('========================');
+    console.log('redBoyContainer');
+    console.log(`width: ${redBoyContainer.width}`);
+    console.log(`height: ${redBoyContainer.height}`);
+    console.log(`x: ${redBoyContainer.x}`);
+    console.log(`y: ${redBoyContainer.y}`);
+
+    console.log('========================');
+    console.log('redBoyRight');
+    console.log(`x: ${redBoyRight.x}`);
+    console.log(`y: ${redBoyRight.y}`);
+    console.log(redBoyRight.position);
+
+    console.log('========================');
+    console.log('redBoyContainer.toGlobal(redBoyRight.position):');
+    console.log(redBoyContainer.toGlobal(redBoyRight.position));
+    console.log('redBoyRight.parent.toGlobal(redBoyRight.position):');
+    console.log(redBoyRight.parent.toGlobal(redBoyRight.position));
+
+    console.log('========================');
+    console.log('redBoyRight.getGlobalPosition():');
+    console.log(redBoyRight.getGlobalPosition());
+
+    console.log('========================');
+    console.log('toLocal():');
+    console.log(redBoyRight.toLocal(redBoyRight.position, redBoyRightWalk2));
+    console.log(redBoyRightWalk1.toLocal(redBoyRightWalk1.position, redBoyRightWalk2));
+    console.log(redBoyRightWalk2.toLocal(redBoyRightWalk2.position, redBoyRightWalk2));
   });
-
-  const left = keyboard(37);
-  const up = keyboard(38);
-  const right = keyboard(39);
-  const down = keyboard(40);
-
-  left.press = (): void => {
-    redBoyRight.vx = -5;
-    redBoyRight.vy = 0;
-  };
-
-  left.release = (): void => {
-    if (!right.isDown && redBoyRight.vy === 0) {
-      redBoyRight.vx = 0;
-    }
-  };
-
-  up.press = (): void => {
-    redBoyRight.vx = 0;
-    redBoyRight.vy = -5;
-  };
-
-  up.release = (): void => {
-    if (!down.isDown && redBoyRight.vx === 0) {
-      redBoyRight.vy = 0;
-    }
-  };
-
-  right.press = (): void => {
-    redBoyRight.vx = 5;
-    redBoyRight.vy = 0;
-  };
-
-  right.release = (): void => {
-    if (!left.isDown && redBoyRight.vy === 0) {
-      redBoyRight.vx = 0;
-    }
-  };
-
-  down.press = (): void => {
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 5;
-  };
-
-  down.release = (): void => {
-    if (!up.isDown && redBoyRight.vx === 0) {
-      redBoyRight.vy = 0;
-    }
-  };
 
   app.ticker.add((delta: number): void => gameLoop(delta));
 };
