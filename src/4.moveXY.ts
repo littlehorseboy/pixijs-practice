@@ -3,7 +3,8 @@ import * as PIXI from 'pixi.js';
 import scaleToWindow from './assets/js/scaleToWindow';
 
 const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
-const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`); // eslint-disable-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
+const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`);
 
 const {
   Application,
@@ -32,7 +33,7 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 
 let redBoyRight;
 
-const gameLoop = (delta) => {
+const gameLoop = (delta: number): void => {
   if (redBoyRight) {
     redBoyRight.vx = 1;
     redBoyRight.vy = 1;
@@ -42,7 +43,7 @@ const gameLoop = (delta) => {
   }
 };
 
-const setup = (loader, resource): void => {
+const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
   console.log('setup');
 
   // redBoy
@@ -56,12 +57,12 @@ const setup = (loader, resource): void => {
     app.stage.addChild(redBoyRight);
   });
 
-  app.ticker.add((delta) => gameLoop(delta));
+  app.ticker.add((delta): void => gameLoop(delta));
 };
 
-const loadProgressHandler = (loader, resource): void => {
+const loadProgressHandler = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
   console.log(`loading ${resource.url}`);
-  console.log(`progress ${loader.progress} %`);
+  console.log(`progress ${pixiLoader.progress} %`);
 };
 
 loader
