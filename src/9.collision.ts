@@ -86,8 +86,8 @@ const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => 
 
   // redBoy
   const sheet = new Spritesheet(resource['images/redBoy.png'].texture, redBoyJson);
-  sheet.parse((something): void => {
-    redBoyRight = new Sprite(something['redright.png']);
+  sheet.parse((spritesheet): void => {
+    redBoyRight = new Sprite(spritesheet['redright.png']);
     redBoyRight.x = 50;
     redBoyRight.y = 50;
     redBoyRight.vx = 0;

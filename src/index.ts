@@ -4,9 +4,9 @@ import scaleToWindow from './assets/js/scaleToWindow';
 import keyboard from './assets/js/keyboard';
 import hitTestRectangle from './assets/js/hitTestReactangle';
 
-const redBoyJson = require('./assets/images/Boy Pixel/redBoy/redBoy.json'); // eslint-disable-line @typescript-eslint/no-var-requires
+const treasureHunterJson = require('./assets/images/treasureHunter/treasureHunter.json'); // eslint-disable-line @typescript-eslint/no-var-requires
 // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
-const redBoyImg = require(`./assets/images/Boy Pixel/redBoy/${redBoyJson.meta.image}`);
+const treasureHunterImg = require(`./assets/images/treasureHunter/${treasureHunterJson.meta.image}`);
 
 const {
   Application,
@@ -15,17 +15,18 @@ const {
   Spritesheet,
   Graphics,
   Text,
+  Container,
 } = PIXI;
 
 const app = new Application({
   antialias: true,
 });
 
+document.body.appendChild(app.view);
+
 window.addEventListener('resize', (): void => {
   scaleToWindow(app.renderer.view);
 });
-
-document.body.appendChild(app.view);
 
 app.renderer.backgroundColor = 0x061639;
 app.renderer.view.style.position = 'absolute';
@@ -38,9 +39,22 @@ interface RedBoyRightI extends PIXI.Sprite {
   vy?: number;
 }
 
+let state: (delta: number) => void;
+let gameScene: PIXI.Container;
+let dungeon: PIXI.Sprite;
+let door: PIXI.Sprite;
+let gameOverScene: PIXI.Container;
 let redBoyRight: RedBoyRightI;
 let box: PIXI.Graphics;
 let message: PIXI.Text;
+
+const end = () => {
+
+};
+
+const play = (delta: number) => {
+
+};
 
 const gameLoop = (delta: number): void => {
   if (redBoyRight) {
@@ -58,42 +72,27 @@ const gameLoop = (delta: number): void => {
 };
 
 const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
-  console.log('setup');
+  // 主遊戲場景
+  gameScene = new Container();
+  app.stage.addChild(gameScene);
 
-  // box
-  box = new Graphics();
-  box.lineStyle(4, 0x99ccff, 1);
-  box.beginFill(0xff9933);
-  box.drawRoundedRect(0, 0, 84, 36, 10);
-  box.endFill();
-  box.position.set(150, 190);
+  // treasureHunter
+  const sheet = new Spritesheet(resource[treasureHunterImg].texture, treasureHunterJson);
+  sheet.parse((spritesheet): void => {
+    dungeon = new Sprite(spritesheet['dungeon.png']);
+    gameScene.addChild(dungeon);
 
-  app.stage.addChild(box);
-
-  // message
-  message = new Text('Hello Pixi!', {
-    fill: '#FFFFFF',
-    stroke: '#FF3300',
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowColor: '#000000',
-    dropShadowBlur: 4,
-    dropShadowAngle: Math.PI / 6,
-    dropShadowDistance: 6,
+    door = new Sprite(spritesheet['door.png']);
+    door.position.set(32, 0);
+    gameScene.addChild(door);
   });
-  message.position.set(250, 190);
-  app.stage.addChild(message);
 
-  // redBoy
-  const sheet = new Spritesheet(resource['images/redBoy.png'].texture, redBoyJson);
-  sheet.parse((something): void => {
-    redBoyRight = new Sprite(something['redright.png']);
-    redBoyRight.x = 50;
-    redBoyRight.y = 50;
-    redBoyRight.vx = 0;
-    redBoyRight.vy = 0;
-    app.stage.addChild(redBoyRight);
-  });
+  gameOverScene = new Container();
+  app.stage.addChild(gameOverScene);
+  gameOverScene.visible = false;
+
+  app.stage.addChild(gameScene);
+  app.stage.addChild(gameOverScene);
 
   const left = keyboard(37);
   const up = keyboard(38);
@@ -144,6 +143,8 @@ const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => 
     }
   };
 
+  state = play;
+
   app.ticker.add((delta: number): void => gameLoop(delta));
 };
 
@@ -153,6 +154,6 @@ const loadProgressHandler = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResou
 };
 
 new Loader()
-  .add(redBoyImg)
+  .add(treasureHunterImg)
   .on('progress', loadProgressHandler)
   .load(setup);
