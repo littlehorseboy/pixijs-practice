@@ -4,6 +4,7 @@ import * as PIXI from 'pixi.js';
 import scaleToWindow from './assets/js/scaleToWindow';
 import keyboard from './assets/js/keyboard';
 import hitTestRectangle from './assets/js/hitTestReactangle';
+import contain from './assets/js/contain';
 
 const treasureHunterJson = require('./assets/images/treasureHunter/treasureHunter.json'); // eslint-disable-line @typescript-eslint/no-var-requires
 // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
@@ -17,6 +18,7 @@ const {
   Container,
   Graphics,
   Text,
+  TextStyle,
 } = PIXI;
 
 const app = new Application({
@@ -29,7 +31,6 @@ window.addEventListener('resize', (): void => {
   scaleToWindow(app.renderer.view);
 });
 
-app.renderer.backgroundColor = 0x061639;
 app.renderer.view.style.position = 'absolute';
 app.renderer.view.style.display = 'block';
 app.renderer.autoResize = true;
@@ -49,38 +50,81 @@ interface HealthBarI extends PIXI.Container {
 }
 
 let state: (delta: number) => void;
-let gameScene: PIXI.Container;
-let dungeon: PIXI.Sprite;
-let door: PIXI.Sprite;
-let explorer: ExplorerI;
-let treasure: PIXI.Sprite;
-let blobs: BlobI[];
-let healthBar: HealthBarI;
-let gameOverScene: PIXI.Container;
-let box: PIXI.Graphics;
-let message: PIXI.Text;
+let gameScene: PIXI.Container; // 遊戲場景
+let dungeon: PIXI.Sprite; // 地下城場景: Sprite
+let door: PIXI.Sprite; // 門: Sprite
+let explorer: ExplorerI; // 冒險者: Sprite
+let treasure: PIXI.Sprite; // 寶藏: Sprite
+let blobs: BlobI[]; // 泡泡怪們: Sprite[]
+let healthBar: HealthBarI; // 血條: Container
+let gameOverScene: PIXI.Container; // 結束畫面場景
+let message: PIXI.Text; // 結束畫面文字
 
-const end = () => {
-
+const end = (): void => {
+  gameScene.visible = false;
+  gameOverScene.visible = true;
 };
 
-const play = (delta: number) => {
+const play = (delta: number): void => {
+  let explorerHit = false;
 
-};
-
-const gameLoop = (delta: number): void => {
   if (explorer) {
     explorer.x += explorer.vx;
     explorer.y += explorer.vy;
-
-    // if (hitTestRectangle(explorer, box)) {
-    //   box.tint = 0xff3300;
-    //   message.text = 'hit!';
-    // } else {
-    //   box.tint = 0xccff99;
-    //   message.text = 'No collision...';
-    // }
+    contain(explorer, {
+      x: 28,
+      y: 10,
+      width: 488,
+      height: 480,
+    });
   }
+
+  if (blobs.length > 0) {
+    blobs.forEach((blob): void => {
+      blob.position.set(blob.x, blob.y + blob.vy);
+
+      const blobHitsWall = contain(blob, {
+        x: 28,
+        y: 10,
+        width: 488,
+        height: 480,
+      });
+
+      if (blobHitsWall === 'top' || blobHitsWall === 'bottom') {
+        Object.assign(blob, { vy: blob.vy * -1 });
+      }
+
+      if (hitTestRectangle(explorer, blob)) {
+        explorerHit = true;
+      }
+    });
+  }
+
+  if (explorerHit) {
+    explorer.alpha = 0.5;
+    healthBar.outer.width -= 1;
+  } else {
+    explorer.alpha = 1;
+  }
+
+  if (hitTestRectangle(explorer, treasure)) {
+    treasure.x = explorer.x + 8;
+    treasure.y = explorer.y + 8;
+  }
+
+  if (hitTestRectangle(treasure, door)) {
+    state = end;
+    message.text = 'You won!';
+  }
+
+  if (healthBar.outer.width < 0) {
+    state = end;
+    message.text = 'You lost!';
+  }
+};
+
+const gameLoop = (delta: number): void => {
+  state(delta);
 };
 
 const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => {
@@ -107,6 +151,56 @@ const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => 
     explorer.vy = 0;
     gameScene.addChild(explorer);
 
+    // 鍵盤控制冒險者
+    const left = keyboard(37);
+    const up = keyboard(38);
+    const right = keyboard(39);
+    const down = keyboard(40);
+
+    left.press = (): void => {
+      explorer.vx = -5;
+      explorer.vy = 0;
+    };
+
+    left.release = (): void => {
+      if (!right.isDown && explorer.vy === 0) {
+        explorer.vx = 0;
+      }
+    };
+
+    up.press = (): void => {
+      explorer.vx = 0;
+      explorer.vy = -5;
+    };
+
+    up.release = (): void => {
+      if (!down.isDown && explorer.vx === 0) {
+        explorer.vy = 0;
+      }
+    };
+
+    right.press = (): void => {
+      explorer.vx = 5;
+      explorer.vy = 0;
+    };
+
+    right.release = (): void => {
+      if (!left.isDown && explorer.vy === 0) {
+        explorer.vx = 0;
+      }
+    };
+
+    down.press = (): void => {
+      explorer.vx = 0;
+      explorer.vy = 5;
+    };
+
+    down.release = (): void => {
+      if (!up.isDown && explorer.vx === 0) {
+        explorer.vy = 0;
+      }
+    };
+
     // 寶藏
     treasure = new Sprite(spritesheet['treasure.png']);
     treasure.position.set(
@@ -124,7 +218,7 @@ const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => 
 
     blobs = [];
 
-    new Array(numberOfBlobs).fill(null).map((item, index): void => {
+    new Array(numberOfBlobs).fill(null).forEach((item, index): void => {
       const blob: BlobI = new Sprite(spritesheet['blob.png']);
 
       const x = spacing * index + xOffset;
@@ -162,60 +256,18 @@ const setup = (pixiLoader: PIXI.Loader, resource: PIXI.LoaderResource): void => 
   });
 
   gameOverScene = new Container();
-  app.stage.addChild(gameOverScene);
   gameOverScene.visible = false;
-
-  app.stage.addChild(gameScene);
   app.stage.addChild(gameOverScene);
 
-  const left = keyboard(37);
-  const up = keyboard(38);
-  const right = keyboard(39);
-  const down = keyboard(40);
+  const textStyle = new TextStyle({
+    fontFamily: 'Futura',
+    fontSize: 64,
+    fill: '#FFFFFF',
+  });
 
-  left.press = (): void => {
-    explorer.vx = -5;
-    explorer.vy = 0;
-  };
-
-  left.release = (): void => {
-    if (!right.isDown && explorer.vy === 0) {
-      explorer.vx = 0;
-    }
-  };
-
-  up.press = (): void => {
-    explorer.vx = 0;
-    explorer.vy = -5;
-  };
-
-  up.release = (): void => {
-    if (!down.isDown && explorer.vx === 0) {
-      explorer.vy = 0;
-    }
-  };
-
-  right.press = (): void => {
-    explorer.vx = 5;
-    explorer.vy = 0;
-  };
-
-  right.release = (): void => {
-    if (!left.isDown && explorer.vy === 0) {
-      explorer.vx = 0;
-    }
-  };
-
-  down.press = (): void => {
-    explorer.vx = 0;
-    explorer.vy = 5;
-  };
-
-  down.release = (): void => {
-    if (!up.isDown && explorer.vx === 0) {
-      explorer.vy = 0;
-    }
-  };
+  message = new Text('The End!', textStyle);
+  message.position.set(120, app.stage.height / 2 - 32);
+  gameOverScene.addChild(message);
 
   state = play;
 
